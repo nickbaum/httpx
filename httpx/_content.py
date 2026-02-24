@@ -28,6 +28,18 @@ from ._utils import peek_filelike_length, primitive_value_to_str
 __all__ = ["ByteStream"]
 
 
+class _AsyncSingleValueIterator(AsyncIterator[bytes]):
+    def __init__(self, value: bytes) -> None:
+        self._value: bytes | None = value
+
+    async def __anext__(self) -> bytes:
+        if self._value is None:
+            raise StopAsyncIteration
+        value = self._value
+        self._value = None
+        return value
+
+
 class ByteStream(AsyncByteStream, SyncByteStream):
     def __init__(self, stream: bytes) -> None:
         self._stream = stream
@@ -35,8 +47,8 @@ class ByteStream(AsyncByteStream, SyncByteStream):
     def __iter__(self) -> Iterator[bytes]:
         yield self._stream
 
-    async def __aiter__(self) -> AsyncIterator[bytes]:
-        yield self._stream
+    def __aiter__(self) -> AsyncIterator[bytes]:
+        return _AsyncSingleValueIterator(self._stream)
 
 
 class IteratorByteStream(SyncByteStream):

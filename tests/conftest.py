@@ -282,6 +282,6 @@ def serve_in_thread(server: TestServer) -> typing.Iterator[TestServer]:
 
 @pytest.fixture(scope="session")
 def server() -> typing.Iterator[TestServer]:
-    config = Config(app=app, lifespan="off", loop="asyncio")
+    config = Config(app=app, lifespan="off", loop="asyncio", interface="asgi3")
     server = TestServer(config=config)
     yield from serve_in_thread(server)
